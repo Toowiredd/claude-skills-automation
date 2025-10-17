@@ -1,0 +1,56 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.directory
+
+# Logs
+*.log
+automation.log
+auto-extracted.log
+file-changes.log
+
+# Testing
+test-*.sh
+*.bak
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Personal
+.env
+*.local
+
+# Backups
+*.backup
+backups/
+
+# Memory files (user-specific, not for repo)
+.claude-memories/
+.claude-sessions/
+.claude-artifacts/
+
+# Node modules (if any)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Python (if any)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+
+# Temporary files
+temp/
+tmp/
