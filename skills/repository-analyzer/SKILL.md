@@ -1,6 +1,17 @@
 ---
 name: repository-analyzer
 description: Analyzes codebases to generate comprehensive documentation including structure, languages, frameworks, dependencies, design patterns, and technical debt. Use when user says "analyze repository", "understand codebase", "document project", or when exploring unfamiliar code.
+priority: MEDIUM
+conflicts_with: [Task tool with Explore agent]
+use_when:
+  - User wants COMPREHENSIVE DOCUMENTATION (saved markdown file)
+  - User wants to ONBOARD to unfamiliar project
+  - User wants WRITTEN ANALYSIS to reference later
+  - User says "document", "analyze repository", "generate docs"
+avoid_when:
+  - User wants to FIND specific code (use Explore agent)
+  - User wants QUICK ANSWERS without documentation
+  - User wants to SEARCH for patterns (use Grep)
 ---
 
 # Repository Analyzer

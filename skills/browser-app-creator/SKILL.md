@@ -1,6 +1,17 @@
 ---
 name: browser-app-creator
 description: Creates complete single-file HTML/CSS/JS web apps with localStorage persistence, ADHD-optimized UI (60px+ buttons), dark mode, and offline functionality. Use when user says "create app", "build tool", "make dashboard", or requests any browser-based interface.
+priority: HIGH
+conflicts_with: [rapid-prototyper]
+use_when:
+  - User wants a COMPLETE, POLISHED web application
+  - User wants ADHD optimization (60px+ buttons, auto-save, dark mode)
+  - User wants something that WORKS OFFLINE
+  - User wants a DOWNLOADABLE single HTML file
+  - User says "app", "tool", "dashboard", "tracker"
+avoid_when:
+  - User wants QUICK PROTOTYPE only
+  - User says "simple", "basic", "test idea"
 ---
 
 # Browser App Creator

@@ -153,8 +153,101 @@ echo "📂 Ensuring memory directories exist..."
 mkdir -p "$HOME/.claude-memories"/{decisions,blockers,context,preferences,procedures,notes,sessions,backups,pre-compact-backups}
 mkdir -p "$HOME/.claude-sessions/projects"
 mkdir -p "$HOME/.claude-artifacts"
+mkdir -p "$HOME/.config/claude-code"
 
 echo -e "${GREEN}✅ All directories created${NC}"
+
+echo ""
+echo "⚙️  Creating default configuration..."
+
+# Create default automation.conf if it doesn't exist
+CONFIG_FILE="$HOME/.config/claude-code/automation.conf"
+CONFIG_SOURCE="$SKILLS_DIR/config/automation.conf"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+  if [ -f "$CONFIG_SOURCE" ]; then
+    cp "$CONFIG_SOURCE" "$CONFIG_FILE"
+    chmod 644 "$CONFIG_FILE"
+    echo -e "${GREEN}✅ Created automation config: $CONFIG_FILE${NC}"
+  else
+    # Create default config inline if source not found
+    cat > "$CONFIG_FILE" <<'CONFIGEOF'
+# Claude Skills Automation Configuration
+# This file controls the behavior of automatic context injection
+
+# =============================================================================
+# TOKEN LIMIT CONTROLS
+# =============================================================================
+# These settings prevent context window overflow by limiting the amount of
+# information injected into each session
+
+# Maximum number of items to inject per category
+MAX_INJECTED_DECISIONS=10
+MAX_INJECTED_BLOCKERS=5
+MAX_INJECTED_CONTEXT=3
+MAX_INJECTED_PROCEDURES=5
+MAX_INJECTED_PREFERENCES=10
+
+# Rough token limit estimate for total context injection (4 chars ≈ 1 token)
+# Default: 2000 tokens (~8000 characters)
+TOKEN_LIMIT_ESTIMATE=2000
+
+# =============================================================================
+# TIME-BASED FILTERING
+# =============================================================================
+# How far back to look for relevant context
+
+# Days to look back for decisions (default: 7)
+DECISIONS_LOOKBACK_DAYS=7
+
+# Only show active blockers (or set to false to show all recent blockers)
+BLOCKERS_ACTIVE_ONLY=true
+
+# Days to look back for context items (default: 14)
+CONTEXT_LOOKBACK_DAYS=14
+
+# =============================================================================
+# FEATURE TOGGLES
+# =============================================================================
+# Enable/disable specific types of context injection
+
+# Inject recent decisions into session context
+INJECT_DECISIONS=true
+
+# Inject active/recent blockers
+INJECT_BLOCKERS=true
+
+# Inject relevant context items
+INJECT_CONTEXT=true
+
+# Inject project preferences
+INJECT_PREFERENCES=true
+
+# Inject standard procedures (can be verbose, disabled by default)
+INJECT_PROCEDURES=false
+
+# Inject last working topic
+INJECT_LAST_TOPIC=true
+
+# =============================================================================
+# ADVANCED SETTINGS
+# =============================================================================
+
+# Enable verbose logging for debugging
+VERBOSE_LOGGING=false
+
+# Show token usage estimates in logs
+SHOW_TOKEN_ESTIMATES=true
+
+# Warn if injected context exceeds token limit
+WARN_ON_LIMIT_EXCEEDED=true
+CONFIGEOF
+    chmod 644 "$CONFIG_FILE"
+    echo -e "${GREEN}✅ Created default automation config: $CONFIG_FILE${NC}"
+  fi
+else
+  echo -e "${YELLOW}⚠️  Config file already exists, keeping existing: $CONFIG_FILE${NC}"
+fi
 
 echo ""
 echo "📝 Creating default memory index..."
@@ -208,13 +301,16 @@ echo ""
 echo "1. ${YELLOW}Start a new Claude Code session${NC}"
 echo "   → Hooks will run automatically"
 echo ""
-echo "2. ${YELLOW}Check automation logs:${NC}"
+echo "2. ${YELLOW}Configure token limits (optional):${NC}"
+echo "   nano ~/.config/claude-code/automation.conf"
+echo ""
+echo "3. ${YELLOW}Check automation logs:${NC}"
 echo "   tail -f ~/.claude-memories/automation.log"
 echo ""
-echo "3. ${YELLOW}View extracted memories:${NC}"
+echo "4. ${YELLOW}View extracted memories:${NC}"
 echo "   tail -f ~/.claude-memories/auto-extracted.log"
 echo ""
-echo "4. ${YELLOW}Read the full guide:${NC}"
+echo "5. ${YELLOW}Read the full guide:${NC}"
 echo "   cat $SKILLS_DIR/AUTOMATION_IMPLEMENTATION.md"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

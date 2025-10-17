@@ -1,6 +1,18 @@
 ---
 name: rapid-prototyper
-description: Creates working prototypes in minutes to validate ideas before full implementation. Use when user says "prototype this", "quick demo", "proof of concept", "can we build", or when exploring new features. Recalls past tech stack choices and generates complete, runnable code.
+description: Creates minimal working prototypes for quick idea validation. Single-file when possible, includes test data, ready to demo immediately. Use when user says "prototype", "MVP", "proof of concept", "quick demo".
+priority: MEDIUM
+conflicts_with: [browser-app-creator]
+use_when:
+  - User wants to VALIDATE AN IDEA quickly
+  - User needs a PROOF OF CONCEPT
+  - User wants MINIMAL implementation
+  - User doesn't care about polish or production-readiness
+  - User says "prototype", "MVP", "quick", "test"
+avoid_when:
+  - User wants a COMPLETE application
+  - User wants ADHD optimization
+  - User wants production-ready code
 ---
 
 # Rapid Prototyper

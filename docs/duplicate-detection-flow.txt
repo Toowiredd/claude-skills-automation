@@ -1,0 +1,288 @@
+┌─────────────────────────────────────────────────────────────────────┐
+│              DUPLICATE MEMORY DETECTION FLOW DIAGRAM                │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 1. CONVERSATION EXTRACTION                                          │
+└─────────────────────────────────────────────────────────────────────┘
+
+  User: "We decided to use PostgreSQL for the database"
+         ↓
+  Stop Hook Triggered
+         ↓
+  Extract Recent Messages (Last 20)
+         ↓
+  Pattern Match: "decided to use"
+         ↓
+  Decision Detected: "decided to use PostgreSQL for the database"
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 2. NORMALIZATION                                                    │
+└─────────────────────────────────────────────────────────────────────┘
+
+  Input: "decided to use PostgreSQL for the database"
+         ↓
+  Step 1: Convert to lowercase
+         ↓ "decided to use postgresql for the database"
+         ↓
+  Step 2: Remove special characters
+         ↓ "decidedtousepostgresqlforthedatabase"
+         ↓
+  Step 3: Check length (must be ≥ 10)
+         ↓ Length: 38 chars ✓
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 3. DUPLICATE CHECK                                                  │
+└─────────────────────────────────────────────────────────────────────┘
+
+  Query Memory Index
+         ↓
+  Get All DECISION Memories
+         ↓
+  ┌──────────────────────────────────────┐
+  │ Existing Memories (Type: DECISION)   │
+  ├──────────────────────────────────────┤
+  │ 1. "using PostgreSQL for database"   │
+  │ 2. "implemented Redis caching"       │
+  │ 3. "added nginx reverse proxy"       │
+  └──────────────────────────────────────┘
+         ↓
+  For Each Existing Memory:
+         ↓
+  Normalize: "usingpostgresqlfordatabase"
+         ↓
+  Compare: "decidedtousepostgresqlforthedatabase"
+           contains "usingpostgresqlfordatabase" ?
+         ↓
+  YES! → DUPLICATE FOUND
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 4A. IF DUPLICATE                                                    │
+└─────────────────────────────────────────────────────────────────────┘
+
+  DUPLICATE Detected
+         ↓
+  Update Timestamp
+  {
+    "id": "mem_1234_5678",
+    "type": "DECISION",
+    "content": "using PostgreSQL for database",
+    "created": "2025-10-17T10:00:00Z",
+    "last_mentioned": "2025-10-17T20:30:00Z" ← UPDATED
+  }
+         ↓
+  Log to automation.log:
+  "[2025-10-17T20:30:00Z] DUPLICATE: decided to use PostgreSQL (timestamp updated)"
+         ↓
+  Log to auto-extracted.log:
+  "[2025-10-17T20:30:00Z] DUPLICATE DECISION (timestamp updated): ..."
+         ↓
+  ✓ Done (No new entry created)
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 4B. IF NEW                                                          │
+└─────────────────────────────────────────────────────────────────────┘
+
+  NEW Decision
+         ↓
+  Generate Memory ID: "mem_1729180000_12345"
+         ↓
+  Create New Entry
+  {
+    "id": "mem_1729180000_12345",
+    "type": "DECISION",
+    "content": "decided to use PostgreSQL for the database",
+    "project": "a3f2c8e9b1d4",
+    "cwd": "/home/user/my-app",
+    "git_repo": "/home/user/my-app",
+    "tags": [],
+    "created": "2025-10-17T20:30:00Z",
+    "last_mentioned": "2025-10-17T20:30:00Z",
+    "source": "auto-extracted"
+  }
+         ↓
+  Update Counters
+  {
+    "total_memories": 4,
+    "memories_by_type": {
+      "DECISION": 4,
+      "BLOCKER": 0
+    }
+  }
+         ↓
+  Log to automation.log:
+  "[2025-10-17T20:30:00Z] [Stop] Saved new DECISION: decided to use..."
+         ↓
+  Log to auto-extracted.log:
+  "[2025-10-17T20:30:00Z] NEW DECISION: decided to use PostgreSQL..."
+         ↓
+  ✓ Done (New entry saved)
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 5. COMPARISON EXAMPLES                                              │
+└─────────────────────────────────────────────────────────────────────┘
+
+Example 1: DUPLICATE (Exact Match)
+  New: "using PostgreSQL"
+  Existing: "using PostgreSQL"
+  Normalized: "usingpostgresql" == "usingpostgresql"
+  Result: ✓ DUPLICATE
+
+Example 2: DUPLICATE (Case Variation)
+  New: "Using POSTGRESQL"
+  Existing: "using postgresql"
+  Normalized: "usingpostgresql" == "usingpostgresql"
+  Result: ✓ DUPLICATE
+
+Example 3: DUPLICATE (Substring)
+  New: "using PostgreSQL"
+  Existing: "We decided to use PostgreSQL for database"
+  Normalized: "usingpostgresql" ⊆ "wedecidedtousepostgresqlfordatabase"
+  Result: ✓ DUPLICATE
+
+Example 4: DUPLICATE (Special Chars)
+  New: "Let's use Redis!"
+  Existing: "Lets use Redis"
+  Normalized: "letsuseRedis" == "letsuseRedis"
+  Result: ✓ DUPLICATE
+
+Example 5: NEW (Different Content)
+  New: "using PostgreSQL"
+  Existing: "using MongoDB"
+  Normalized: "usingpostgresql" ≠ "usingmongodb"
+  Result: ✗ NEW
+
+Example 6: NEW (Different Type)
+  New: BLOCKER: "cannot connect"
+  Existing: DECISION: "cannot connect"
+  Type Check: BLOCKER ≠ DECISION
+  Result: ✗ NEW
+
+Example 7: NO MATCH (Too Short)
+  New: "using"
+  Existing: "use"
+  Normalized: "using" (5 chars) < 10 chars minimum
+  Result: ✗ NO MATCH
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 6. TYPE ISOLATION                                                   │
+└─────────────────────────────────────────────────────────────────────┘
+
+  DECISIONS                    BLOCKERS
+  ┌────────────────┐          ┌────────────────┐
+  │ using PostgreSQL│          │ cannot connect │
+  │ using Redis     │          │ missing API key│
+  │ added nginx     │          │ failed build   │
+  └────────────────┘          └────────────────┘
+         ↓                            ↓
+    Isolated                      Isolated
+         ↓                            ↓
+  "cannot connect" in DECISIONS ≠ "cannot connect" in BLOCKERS
+                           ↓
+              Both can exist without conflict
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 7. TIMESTAMP TRACKING                                               │
+└─────────────────────────────────────────────────────────────────────┘
+
+  Timeline:
+
+  10:00 AM → Save: "using PostgreSQL"
+             created: 10:00 AM
+             last_mentioned: 10:00 AM
+
+  10:15 AM → Detect: "Using POSTGRESQL"
+             ↓ DUPLICATE
+             created: 10:00 AM (unchanged)
+             last_mentioned: 10:15 AM (updated)
+
+  10:30 AM → Detect: "decided to use PostgreSQL"
+             ↓ DUPLICATE
+             created: 10:00 AM (unchanged)
+             last_mentioned: 10:30 AM (updated)
+
+  Result: Single entry, recency maintained
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 8. PERFORMANCE CHARACTERISTICS                                      │
+└─────────────────────────────────────────────────────────────────────┘
+
+  Operation: Check for Duplicates
+  ↓
+  Read Memory Index (1 I/O)
+  ↓
+  For each existing memory of same type:
+    - Normalize new content (O(m))
+    - Normalize existing content (O(m))
+    - Substring match (O(m))
+  ↓
+  Total: O(n * m) where:
+    n = number of existing memories of same type
+    m = average content length
+  ↓
+  Typical: < 10ms for < 100 memories
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 9. ERROR HANDLING                                                   │
+└─────────────────────────────────────────────────────────────────────┘
+
+  Scenario: Missing Index File
+  ↓
+  check_duplicate() returns "NEW"
+  ↓
+  save_new_memory() attempts to save
+  ↓
+  Fails gracefully, logs error
+
+  Scenario: Malformed JSON
+  ↓
+  jq parse fails
+  ↓
+  Returns empty string
+  ↓
+  Treats as "NEW"
+
+  Scenario: Write Permission Denied
+  ↓
+  mv command fails
+  ↓
+  Logs error
+  ↓
+  Continues execution
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 10. BENEFITS SUMMARY                                                │
+└─────────────────────────────────────────────────────────────────────┘
+
+  Before Duplicate Detection:
+  ┌────────────────────────────────────┐
+  │ Memory Index: 50 entries           │
+  ├────────────────────────────────────┤
+  │ "using PostgreSQL"                 │
+  │ "Using POSTGRESQL"                 │
+  │ "decided to use PostgreSQL"        │
+  │ "We're using PostgreSQL"           │
+  │ "PostgreSQL for database"          │
+  │ ... (45 more)                      │
+  └────────────────────────────────────┘
+  Size: ~25 KB
+
+  After Duplicate Detection:
+  ┌────────────────────────────────────┐
+  │ Memory Index: 20 entries           │
+  ├────────────────────────────────────┤
+  │ "using PostgreSQL"                 │
+  │   last_mentioned: 10:30 AM         │
+  │ "using Redis cache"                │
+  │   last_mentioned: 11:00 AM         │
+  │ "added nginx proxy"                │
+  │   last_mentioned: 11:15 AM         │
+  │ ... (17 more)                      │
+  └────────────────────────────────────┘
+  Size: ~10 KB
+
+  Improvement:
+  ✓ 60% reduction in entries
+  ✓ 60% reduction in file size
+  ✓ Recency tracking maintained
+  ✓ No information loss
