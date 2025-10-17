@@ -81,15 +81,27 @@ You: [Just start working - context already there]
 
 ## 🚀 Quick Start
 
-### Installation (2 minutes)
+### Basic Installation (2 minutes)
 
 ```bash
 # Clone repository
 git clone https://github.com/toowiredd/claude-skills-automation
 cd claude-skills-automation
 
-# Run installer
+# Run basic installer
 bash scripts/install.sh
+```
+
+### Supercharged Installation with Paid Subscriptions Integration
+
+If you have Pieces.app, GitHub Copilot Pro, Docker Pro, Codegen-ai, Jules CLI, or Codacy:
+
+```bash
+# Run enhanced installer
+bash scripts/install-integrations.sh
+
+# See full integration guide
+cat docs/SUBSCRIPTIONS_INTEGRATION.md
 ```
 
 That's it! Your next Claude Code session will have full automation.
@@ -108,7 +120,9 @@ tail -f ~/.claude-memories/automation.log
 
 ## 📋 What Gets Installed
 
-### 5 Automation Hooks (~10KB total)
+### Automation Hooks
+
+**Core Hooks (5)** - Memory & context automation:
 | Hook | Size | Executes When | Performance |
 |------|------|---------------|-------------|
 | `session-start.sh` | 3.1 KB | Session starts | 100ms |
@@ -117,7 +131,16 @@ tail -f ~/.claude-memories/automation.log
 | `post-tool-track.sh` | 1.4 KB | After file edits | 10ms |
 | `pre-compact-backup.sh` | 1.5 KB | Before compression | 100ms |
 
-**Total overhead per session**: <500ms (negligible)
+**Integration Hooks (7)** - 🆕 Paid subscriptions:
+- `async-task-jules.sh` - Jules CLI async tasks
+- `error-lookup-copilot.sh` - GitHub Copilot error search
+- `pre-commit-copilot-review.sh` - AI code review
+- `pre-commit-codacy-check.sh` - Quality gates
+- `post-tool-save-to-pieces.sh` - Pieces.app sync
+- `testing-docker-isolation.sh` - Docker isolated tests
+- `codegen-agent-trigger.sh` - Autonomous agents
+
+**Total overhead per session**: <500ms (core only)
 
 ### 5 Claude Skills
 - **session-launcher** - Zero context loss restoration
@@ -144,6 +167,7 @@ tail -f ~/.claude-memories/automation.log
 
 - **[Quick Start](docs/QUICK_START.md)** - Get started in 5 minutes
 - **[Complete Guide](docs/README-AUTOMATION.md)** - Full documentation (3,500+ lines)
+- **[Subscriptions Integration](docs/SUBSCRIPTIONS_INTEGRATION.md)** - 🆕 Paid subscriptions integration guide
 - **[Implementation](docs/AUTOMATION_IMPLEMENTATION.md)** - Technical details
 - **[Research](docs/AUTOMATION_RESEARCH.md)** - How we built this
 
