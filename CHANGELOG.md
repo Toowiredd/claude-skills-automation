@@ -2,6 +2,57 @@
 
 All notable changes to Claude Skills Automation will be documented in this file.
 
+## [2.0.0] - 2025-10-17
+
+### Added - Major New Skills 🚀
+
+#### 3 New Production-Ready Skills
+- **browser-app-creator** - Generates complete single-file HTML/CSS/JS web apps
+  - ADHD-optimized UI (60px+ buttons, auto-save, dark mode default)
+  - localStorage persistence (works offline)
+  - Mobile responsive
+  - Zero setup, download and use immediately
+  - Progressive disclosure architecture (SKILL.md + templates.md + styling.md)
+
+- **repository-analyzer** - Comprehensive codebase analysis and documentation
+  - Scans entire project structure
+  - Detects languages, frameworks, and architecture patterns
+  - Maps dependencies and extracts TODOs/FIXMEs
+  - Generates markdown documentation automatically
+  - SDAM-optimized (creates external memory of codebase)
+  - Progressive disclosure architecture (SKILL.md + patterns.md + examples.md)
+
+- **api-integration-builder** - Production-ready API client generator
+  - TypeScript types for all endpoints
+  - Automatic retry logic with exponential backoff
+  - Rate limiting (prevents 429 errors)
+  - Authentication support (API key, OAuth 2.0, Basic, JWT)
+  - Custom error classes
+  - Mock responses for testing
+  - Progressive disclosure architecture (SKILL.md + examples.md + reference.md)
+
+#### Code Quality Improvements
+- All new skills follow progressive disclosure best practice (<500 lines main file)
+- Comprehensive reference documentation for each skill
+- Real-world examples included
+- CI/CD workflows added (test-hooks.yml, lint.yml) - manual trigger only
+
+### Changed
+- Updated README to reflect 8 total skills (5 core + 3 new)
+- Updated Quick Stats to show accurate counts
+- error-debugger refactored to follow progressive disclosure pattern (730 → 430 lines)
+
+### Skills Total: 8
+- **Core (5)**: session-launcher, context-manager, error-debugger, testing-builder, rapid-prototyper
+- **New (3)**: browser-app-creator, repository-analyzer, api-integration-builder
+
+### Why v2.0.0 (Major Version)?
+This release significantly expands the system's capabilities:
+- **60% increase** in skills (5 → 8 skills)
+- **New use cases**: Client-side apps, codebase analysis, API integrations
+- **Production-ready**: All skills follow best practices and include comprehensive docs
+- **Complementary**: New skills fill gaps in the existing toolset
+
 ## [1.1.0] - 2025-10-17
 
 ### Added
@@ -102,5 +153,6 @@ All notable changes to Claude Skills Automation will be documented in this file.
 
 ## Version History
 
+- **v2.0.0** - Major expansion: 3 new skills (browser-app-creator, repository-analyzer, api-integration-builder) (2025-10-17)
 - **v1.1.0** - Paid subscriptions integration (2025-10-17)
 - **v1.0.0** - Initial release (2025-10-17)

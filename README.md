@@ -142,12 +142,19 @@ tail -f ~/.claude-memories/automation.log
 
 **Total overhead per session**: <500ms (core only)
 
-### 5 Claude Skills
+### 8 Claude Skills
+
+**Core Skills (5)**:
 - **session-launcher** - Zero context loss restoration
 - **context-manager** - Permanent memory management
 - **error-debugger** - Smart debugging with past solutions
 - **testing-builder** - Automatic test generation
 - **rapid-prototyper** - Fast idea validation
+
+**New Skills (3)** 🆕:
+- **browser-app-creator** - Generates single-file HTML/CSS/JS apps (ADHD-optimized, 60px+ buttons, localStorage)
+- **repository-analyzer** - Analyzes codebases, generates documentation, detects patterns, extracts TODOs
+- **api-integration-builder** - Creates TypeScript API clients with retry logic, rate limiting, and auth
 
 ### Memory Storage
 ```
@@ -424,8 +431,8 @@ If this helps you:
 
 ## 📈 Quick Stats
 
-- **5** automation hooks
-- **5** Claude Skills
+- **12** automation hooks (5 core + 7 integrations)
+- **8** Claude Skills (5 core + 3 new)
 - **<500ms** overhead
 - **<100MB** disk usage/year
 - **Zero** maintenance required
