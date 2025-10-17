@@ -157,6 +157,37 @@ mkdir -p "$HOME/.claude-artifacts"
 echo -e "${GREEN}✅ All directories created${NC}"
 
 echo ""
+echo "📝 Creating default memory index..."
+
+# Create default index.json if it doesn't exist
+if [ ! -f "$HOME/.claude-memories/index.json" ]; then
+  cat > "$HOME/.claude-memories/index.json" <<'EOF'
+{
+  "version": "1.0.0",
+  "created": "'$(date -Iseconds)'",
+  "last_updated": "'$(date -Iseconds)'",
+  "total_memories": 0,
+  "memories_by_type": {
+    "DECISION": 0,
+    "BLOCKER": 0,
+    "CONTEXT": 0,
+    "PREFERENCE": 0,
+    "PROCEDURE": 0,
+    "NOTE": 0
+  },
+  "memories": [],
+  "tags_index": {},
+  "project_index": {},
+  "session_index": {}
+}
+EOF
+  chmod 644 "$HOME/.claude-memories/index.json"
+  echo -e "${GREEN}✅ Created default memory index${NC}"
+else
+  echo -e "${YELLOW}⚠️  Memory index already exists, keeping existing${NC}"
+fi
+
+echo ""
 echo "🧪 Testing hooks..."
 
 # Test session-start hook
