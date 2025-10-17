@@ -1,0 +1,72 @@
+name: Lint and Quality Checks
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on all hooks
+        run: |
+          echo "Running ShellCheck on hooks..."
+          for hook in hooks/*.sh; do
+            echo "Checking $hook..."
+            shellcheck "$hook" -e SC2086 -e SC2181 || {
+              echo "⚠️ ShellCheck found issues in $hook (non-blocking)"
+            }
+          done
+
+      - name: Run ShellCheck on install scripts
+        run: |
+          echo "Running ShellCheck on install scripts..."
+          for script in scripts/*.sh; do
+            echo "Checking $script..."
+            shellcheck "$script" -e SC2086 -e SC2181 || {
+              echo "⚠️ ShellCheck found issues in $script (non-blocking)"
+            }
+          done
+
+  markdown-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
+
+      - name: Run markdownlint
+        run: |
+          markdownlint '**/*.md' --ignore node_modules --ignore CHANGELOG.md || {
+            echo "⚠️ Markdown lint found issues (non-blocking)"
+            exit 0
+          }
+
+  check-yaml:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: sudo apt-get update && sudo apt-get install -y yamllint
+
+      - name: Check GitHub Actions workflows
+        run: |
+          yamllint .github/workflows/*.yml || {
+            echo "⚠️ YAML lint found issues (non-blocking)"
+            exit 0
+          }

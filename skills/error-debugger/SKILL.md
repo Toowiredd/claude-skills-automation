@@ -74,32 +74,15 @@ Applying the same solution...
 
 ### 3. Analyze Error
 
-**Common patterns**:
+See [reference.md](reference.md) for comprehensive error pattern library.
 
-**TypeError: Cannot read property 'X' of undefined**
-- Root cause: Trying to access property on undefined/null
-- Common in: API responses, component props, array operations
-- Fix pattern: Add null checks, optional chaining, default values
+**Quick common patterns**:
 
-**ECONNREFUSED**
-- Root cause: Service not running or wrong port
-- Common in: Database connections, API calls, microservices
-- Fix pattern: Check service status, verify ports, check environment variables
-
-**CORS errors**
-- Root cause: Cross-origin request blocked
-- Common in: Frontend calling backend API
-- Fix pattern: Configure CORS headers, use proxy, check origin whitelist
-
-**404 Not Found**
-- Root cause: Route doesn't exist or incorrect path
-- Common in: API endpoints, file paths, routing
-- Fix pattern: Verify route definition, check path spelling, review route order
-
-**500 Internal Server Error**
-- Root cause: Unhandled exception in server code
-- Common in: API endpoints, database queries, file operations
-- Fix pattern: Check server logs, add error handling, verify inputs
+- **TypeError: Cannot read property 'X' of undefined** → Optional chaining + defaults
+- **ECONNREFUSED** → Check service running, verify ports
+- **CORS errors** → Configure CORS headers
+- **404 Not Found** → Verify route definition
+- **500 Internal Server Error** → Check server logs
 
 ### 4. Provide Fix
 
@@ -113,14 +96,12 @@ Applying the same solution...
 
 **Fix**:
 
-{before_code}
 ```javascript
 // ❌ Current code
 const users = data.users;
 return users.map(user => <div>{user.name}</div>);
 ```
 
-{after_code}
 ```javascript
 // ✅ Fixed code
 const users = data?.users || [];
@@ -200,123 +181,113 @@ create regression test for this fix:
 - Test that component works with valid data
 ```
 
-## Error Pattern Library
+## Tool Persistence Pattern (Meta-Learning)
 
-### JavaScript/TypeScript Errors
+**Critical principle from self-analysis**: Never give up on first obstacle. Try 3 approaches before abandoning a solution path.
 
-**Cannot read property 'X' of undefined**
-```javascript
-// Fix: Optional chaining + defaults
-const value = obj?.nested?.property || defaultValue;
-```
+### Debugging Tools Hierarchy
 
-**X is not a function**
-```javascript
-// Fix: Validate function exists
-if (typeof callback === 'function') {
-  callback();
-}
-```
+When debugging an error, try these tools in sequence:
 
-**Cannot find module 'X'**
+**1. Search Past Solutions (context-manager)**
 ```bash
-# Fix: Install dependency
-npm install X
-# Or fix import path
-import X from './correct/path/to/X';
+# First approach: Check memory
+search memories for error pattern
 ```
 
-### Network Errors
+If no past solution found → Continue to next approach
 
-**ECONNREFUSED**
+**2. GitHub Copilot CLI Search**
 ```bash
-# Fix: Check service is running
-docker ps  # or
-ps aux | grep service-name
-# Verify port matches
-echo $PORT  # check environment variable
+# Second approach: Search public issues
+copilot "Search GitHub for solutions to: $ERROR_MESSAGE"
 ```
 
-**CORS error**
-```javascript
-// Fix: Configure CORS (Express example)
-const cors = require('cors');
-app.use(cors({
-  origin: ['http://localhost:3000'],
-  credentials: true
-}));
-```
+If Copilot doesn't find good results → Continue to next approach
 
-**Timeout errors**
-```javascript
-// Fix: Increase timeout or add retry
-const response = await fetch(url, {
-  signal: AbortSignal.timeout(30000)  // 30 seconds
-});
-```
-
-### Database Errors
-
-**Connection refused**
+**3. Web Search with Current Context**
 ```bash
-# Fix: Check database running and credentials
-docker ps | grep postgres
-# Verify connection string
-echo $DATABASE_URL
+# Third approach: Real-time web search
+[Use web search for latest Stack Overflow solutions]
 ```
 
-**Syntax error in query**
-```javascript
-// Fix: Use parameterized queries
-// ❌ Don't
-db.query(`SELECT * FROM users WHERE id = ${id}`);
-// ✅ Do
-db.query('SELECT * FROM users WHERE id = $1', [id]);
-```
+If web search fails → Then ask user for more context
 
-**Unique constraint violation**
+### Real Example from Meta-Analysis
+
+**What happened**: Tried GitHub MCP → Got auth error → Immediately gave up
+
+**What should have happened**:
+1. Try GitHub MCP → Auth error
+2. Try `gh` CLI → Check if authenticated
+3. Try direct GitHub API → Use personal token
+4. Then create manual instructions if all fail
+
+**Outcome**: The `gh` CLI WAS authenticated and worked perfectly. We gave up too early.
+
+### Applying This to Error Debugging
+
+When fixing an error:
+
 ```javascript
-// Fix: Check before insert or handle error
-try {
-  await db.users.create({ email });
-} catch (error) {
-  if (error.code === '23505') {  // Unique violation
-    throw new Error('Email already exists');
+// Pattern: Try 3 fix approaches
+async function debugError(error) {
+  // Approach 1: Past solution
+  const pastFix = await searchMemories(error);
+  if (pastFix?.success_rate > 80%) {
+    return applyPastFix(pastFix);
   }
-  throw error;
+
+  // Approach 2: Pattern matching
+  const commonFix = matchErrorPattern(error);
+  if (commonFix) {
+    return applyCommonFix(commonFix);
+  }
+
+  // Approach 3: External search (Copilot/Web)
+  const externalSolution = await searchExternalSolutions(error);
+  if (externalSolution) {
+    return applyExternalSolution(externalSolution);
+  }
+
+  // Only NOW ask for more context
+  return askUserForMoreContext(error);
 }
 ```
 
-### React Errors
+### Integration Tool Persistence
 
-**Too many re-renders**
-```javascript
-// Fix: Move handler to useCallback or fix dependency
-const handleClick = useCallback(() => {
-  setCount(c => c + 1);
-}, []);  // Stable reference
-```
+When integrations are available, use them in this order:
 
-**Hook called conditionally**
-```javascript
-// ❌ Don't
-if (condition) {
-  useState(...);
+**For Error Search**:
+1. GitHub Copilot CLI → Search issues in your repos and similar projects
+2. Local memory → Past solutions you've saved
+3. Web search → Latest Stack Overflow/docs
+
+**For Solutions**:
+1. Past solution from memory (fastest)
+2. Codegen-ai agent (if complex bug) → Automated PR
+3. Jules CLI async task (if time-consuming fix)
+4. Manual fix with code examples
+
+### Metrics
+
+Track debugging approach success:
+
+```json
+{
+  "error_id": "uuid",
+  "approaches_tried": [
+    {"type": "memory_search", "result": "no_match"},
+    {"type": "copilot_search", "result": "success", "time": "5s"},
+    {"type": "applied_fix", "verified": true}
+  ],
+  "total_time": "30s",
+  "lesson": "Copilot found solution on second try"
 }
-// ✅ Do
-const [state, setState] = useState(...);
-if (condition) {
-  // Use state here
-}
 ```
 
-**Cannot update component while rendering**
-```javascript
-// Fix: Use useEffect for side effects
-useEffect(() => {
-  setParentState(value);
-}, [value]);
-```
+**Key insight**: Most "failed" approaches are actually "didn't try enough" approaches.
 
 ## Context Integration
 
@@ -415,137 +386,10 @@ If fix requires significant refactoring:
 → User validates before applying to codebase
 ```
 
-## Debugging Workflow Examples
+## Additional Resources
 
-### Example 1: Simple TypeError
-
-**User**: "Getting error: Cannot read property 'map' of undefined"
-
-**Debugger**:
-```
-🔍 Searching past solutions...
-✅ Found solution from 2 weeks ago!
-
-This is a common pattern in your codebase. You've fixed this 3 times before:
-
-**Solution**: Add optional chaining and default array
-```javascript
-const items = data?.items || [];
-return items.map(item => ...)
-```
-
-Apply this fix? (yes/no)
-```
-
-**User**: "yes"
-
-**Debugger**:
-```
-✅ Fix applied
-🧪 Creating regression test...
-📝 Solution saved to memory
-
-**Regression test**: tests/components/ItemList.test.jsx
-```
-
-### Example 2: New Error
-
-**User**: "Error: ENOTFOUND api.example.com"
-
-**Debugger**:
-```
-🆕 New error pattern
-
-**Type**: DNS resolution failure
-**Cause**: Cannot resolve hostname api.example.com
-
-**Possible causes**:
-1. Typo in hostname
-2. Service is down
-3. Network connectivity issue
-4. DNS server problem
-
-**Troubleshooting steps**:
-1. Check hostname spelling
-2. Ping the hostname: `ping api.example.com`
-3. Check if service is accessible: `curl -I https://api.example.com`
-4. Verify network: `ping 8.8.8.8`
-
-What's the result of these checks?
-```
-
-**User**: "typo - should be api.myapp.com"
-
-**Debugger**:
-```
-✅ Root cause: Hostname typo
-
-**Fix**: Update API endpoint
-```javascript
-// ❌ Wrong
-const API_URL = 'https://api.example.com';
-
-// ✅ Correct
-const API_URL = 'https://api.myapp.com';
-```
-
-💾 Saving solution...
-🧪 Creating test to verify API endpoint...
-
-**Test created**: tests/api/connection.test.js
-(Verifies correct hostname is used)
-```
-
-### Example 3: Complex Error
-
-**User**: "Getting 500 error from /api/users endpoint"
-
-**Debugger**:
-```
-🔍 500 Internal Server Error - need more info
-
-**What I need**:
-1. Server logs (most recent error)
-2. Request payload
-3. Database connection status
-
-Can you provide server logs?
-```
-
-**User**: [pastes logs showing SQL syntax error]
-
-**Debugger**:
-```
-✅ Found root cause: SQL syntax error in query
-
-**Error**: Invalid SQL syntax - missing comma in column list
-
-**Location**: src/api/users.js:42
-
-**Fix**:
-```javascript
-// ❌ Current
-const query = `
-  SELECT id name email
-  FROM users
-  WHERE active = true
-`;
-
-// ✅ Fixed
-const query = `
-  SELECT id, name, email
-  FROM users
-  WHERE active = true
-`;
-```
-
-**Prevention**: Use query builder or ORM to avoid SQL syntax errors
-
-**Recommended**: Switch to parameterized queries with a library like `pg` or use an ORM like Prisma
-
-💾 Saving solution...
-🧪 Creating API test...
-```
+- **[Error Pattern Library](reference.md)** - Comprehensive patterns for JavaScript, Network, Database, React errors
+- **[Debugging Examples](examples.md)** - Step-by-step debugging workflow examples
 
 ## Quick Reference
 

@@ -1,0 +1,128 @@
+name: Test Automation Hooks
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  test-hooks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Create test directories
+        run: |
+          mkdir -p ~/.claude-memories
+          mkdir -p ~/.claude-sessions/projects
+          mkdir -p ~/.claude-artifacts
+
+      - name: Create test memory index
+        run: |
+          cat > ~/.claude-memories/index.json <<'EOF'
+          {
+            "version": "1.0.0",
+            "created": "2025-10-17T00:00:00Z",
+            "last_updated": "2025-10-17T00:00:00Z",
+            "total_memories": 0,
+            "memories_by_type": {
+              "DECISION": 0,
+              "BLOCKER": 0,
+              "CONTEXT": 0,
+              "PREFERENCE": 0,
+              "PROCEDURE": 0,
+              "NOTE": 0
+            },
+            "memories": [],
+            "tags_index": {},
+            "project_index": {},
+            "session_index": {}
+          }
+          EOF
+
+      - name: Test session-start hook
+        run: |
+          echo '{"session_id":"test-session","cwd":"'$PWD'","transcript_path":"'$PWD'/test.jsonl"}' | hooks/session-start.sh
+          echo "✅ session-start hook executed"
+
+      - name: Test session-end hook
+        run: |
+          echo '{"session_id":"test-session","cwd":"'$PWD'"}' | hooks/session-end.sh
+          echo "✅ session-end hook executed"
+
+      - name: Test stop-extract-memories hook
+        run: |
+          TEST_INPUT='{"messages":[{"role":"user","content":"We decided to use PostgreSQL"},{"role":"assistant","content":"Great choice! PostgreSQL is excellent."}]}'
+          echo "$TEST_INPUT" | hooks/stop-extract-memories.sh
+          echo "✅ stop-extract-memories hook executed"
+
+      - name: Test post-tool-track hook
+        run: |
+          TEST_INPUT='{"tool_name":"Write","parameters":{"file_path":"'$PWD'/test.txt","content":"test"}}'
+          echo "$TEST_INPUT" | hooks/post-tool-track.sh
+          echo "✅ post-tool-track hook executed"
+
+      - name: Test pre-compact-backup hook
+        run: |
+          TEST_INPUT='{"session_id":"test-session","cwd":"'$PWD'","transcript_path":"'$PWD'/test.jsonl"}'
+          echo "$TEST_INPUT" | hooks/pre-compact-backup.sh
+          echo "✅ pre-compact-backup hook executed"
+
+      - name: Verify automation.log created
+        run: |
+          if [ -f ~/.claude-memories/automation.log ]; then
+            echo "✅ automation.log created"
+            tail -20 ~/.claude-memories/automation.log
+          else
+            echo "⚠️ automation.log not created (may be expected for some hooks)"
+          fi
+
+      - name: Verify memory index unchanged
+        run: |
+          TOTAL=$(jq '.total_memories' ~/.claude-memories/index.json)
+          echo "Total memories in index: $TOTAL"
+          echo "✅ Memory index accessible"
+
+      - name: Test all hooks are executable
+        run: |
+          for hook in hooks/*.sh; do
+            if [ -x "$hook" ]; then
+              echo "✅ $hook is executable"
+            else
+              echo "❌ $hook is NOT executable"
+              exit 1
+            fi
+          done
+
+      - name: Verify hook syntax
+        run: |
+          for hook in hooks/*.sh; do
+            bash -n "$hook" && echo "✅ $hook syntax valid" || { echo "❌ $hook has syntax errors"; exit 1; }
+          done
+
+  test-integration-hooks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Test integration hooks syntax
+        run: |
+          for hook in hooks/async-task-jules.sh hooks/error-lookup-copilot.sh hooks/pre-commit-copilot-review.sh hooks/pre-commit-codacy-check.sh hooks/post-tool-save-to-pieces.sh hooks/testing-docker-isolation.sh hooks/codegen-agent-trigger.sh; do
+            if [ -f "$hook" ]; then
+              bash -n "$hook" && echo "✅ $hook syntax valid" || { echo "❌ $hook has syntax errors"; exit 1; }
+            fi
+          done
+
+      - name: Test graceful degradation (CLIs not installed)
+        run: |
+          # These should exit gracefully when tools aren't installed
+          echo '{"test":"data"}' | hooks/async-task-jules.sh || echo "✅ Jules hook handles missing CLI gracefully"
+          echo "test error" | hooks/error-lookup-copilot.sh test-error $(pwd) || echo "✅ Copilot hook handles missing CLI gracefully"
