@@ -1,7 +1,11 @@
+# DISABLED AUTO-RUN: Originally triggered on auto-triggers
+# Converted to manual execution only - 2025-10-18
+# Backup available at: lint.yml.backup
 name: Lint and Quality Checks
 
 on:
   workflow_dispatch:  # Manual trigger only
+#   workflow_dispatch:  # Manual trigger only
 
 jobs:
   shellcheck:
