@@ -7,7 +7,7 @@ set -euo pipefail
 PROJECT_DIR="${1:-$PWD}"
 TEST_COMMAND="${2:-npm test}"
 
-LOG_FILE="/home/toowired/.claude-memories/automation.log"
+LOG_FILE="$HOME/.claude-memories/automation.log"
 
 log() {
   echo "[$(date -Iseconds)] [DockerTest] $1" >> "$LOG_FILE"

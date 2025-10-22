@@ -5,9 +5,9 @@
 
 set +e  # Don't exit on error - graceful degradation
 
-CURRENT_SESSION="/home/toowired/.claude-sessions/current.json"
-BACKUP_DIR="/home/toowired/.claude-memories/backups"
-LOG_FILE="/home/toowired/.claude-memories/automation.log"
+CURRENT_SESSION="$HOME/.claude-sessions/current.json"
+BACKUP_DIR="$HOME/.claude-memories/backups"
+LOG_FILE="$HOME/.claude-memories/automation.log"
 
 log() {
   echo "[$(date -Iseconds)] [SessionEnd] $1" >> "$LOG_FILE" 2>/dev/null || true
@@ -77,7 +77,7 @@ main() {
   log "Saving session: $PROJECT_NAME ($SESSION_ID)"
 
   # Save session state
-  PROJECT_SESSION="/home/toowired/.claude-sessions/projects/${PROJECT_NAME}.json"
+  PROJECT_SESSION="$HOME/.claude-sessions/projects/${PROJECT_NAME}.json"
   mkdir -p "$(dirname "$PROJECT_SESSION")" 2>/dev/null
 
   if [ $? -ne 0 ]; then

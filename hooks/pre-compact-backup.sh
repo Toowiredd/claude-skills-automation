@@ -5,9 +5,9 @@
 
 set +e  # Don't exit on error - graceful degradation
 
-BACKUP_DIR="/home/toowired/.claude-memories/pre-compact-backups"
-LOG_FILE="/home/toowired/.claude-memories/automation.log"
-DECISIONS_LOG="/home/toowired/.claude-memories/pre-compact-decisions.log"
+BACKUP_DIR="$HOME/.claude-memories/pre-compact-backups"
+LOG_FILE="$HOME/.claude-memories/automation.log"
+DECISIONS_LOG="$HOME/.claude-memories/pre-compact-decisions.log"
 
 log() {
   echo "[$(date -Iseconds)] [PreCompact] $1" >> "$LOG_FILE" 2>/dev/null || true
