@@ -7,7 +7,7 @@ set -euo pipefail
 ERROR_TEXT="$1"
 PROJECT_DIR="${2:-$PWD}"
 
-LOG_FILE="/home/toowired/.claude-memories/automation.log"
+LOG_FILE="$HOME/.claude-memories/automation.log"
 
 log() {
   echo "[$(date -Iseconds)] [Copilot] $1" >> "$LOG_FILE"

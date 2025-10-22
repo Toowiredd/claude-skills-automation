@@ -5,8 +5,8 @@
 
 set +e  # Don't exit on error - graceful degradation
 
-LOG_FILE="/home/toowired/.claude-memories/automation.log"
-CHANGES_LOG="/home/toowired/.claude-memories/file-changes.log"
+LOG_FILE="$HOME/.claude-memories/automation.log"
+CHANGES_LOG="$HOME/.claude-memories/file-changes.log"
 
 log() {
   echo "[$(date -Iseconds)] [PostToolUse] $1" >> "$LOG_FILE" 2>/dev/null || true

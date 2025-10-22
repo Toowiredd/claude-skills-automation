@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-LOG_FILE="/home/toowired/.claude-memories/automation.log"
+LOG_FILE="$HOME/.claude-memories/automation.log"
 
 log() {
   echo "[$(date -Iseconds)] [Codacy] $1" >> "$LOG_FILE"

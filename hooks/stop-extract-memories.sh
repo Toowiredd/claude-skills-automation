@@ -5,9 +5,9 @@
 
 set +e  # Don't exit on error - graceful degradation
 
-MEMORY_INDEX="/home/toowired/.claude-memories/index.json"
-LOG_FILE="/home/toowired/.claude-memories/automation.log"
-EXTRACT_LOG="/home/toowired/.claude-memories/auto-extracted.log"
+MEMORY_INDEX="$HOME/.claude-memories/index.json"
+LOG_FILE="$HOME/.claude-memories/automation.log"
+EXTRACT_LOG="$HOME/.claude-memories/auto-extracted.log"
 
 log() {
   echo "[$(date -Iseconds)] [Stop] $1" >> "$LOG_FILE" 2>/dev/null || true
